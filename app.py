@@ -227,6 +227,7 @@ def profile():
             user.image_url = form.image_url.data or User.image_url.default.arg
             user.header_image_url = form.header_image_url.data or User.header_image_url.arg
             user.bio = form.bio.data
+            user.location = form.location.data
 
             db.session.commit()
             flash(f'Profile "{g.user.username}" updated.', 'success')
