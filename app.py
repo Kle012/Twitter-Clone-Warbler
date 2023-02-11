@@ -61,9 +61,10 @@ def signup():
 
     If form not valid, present form.
 
-    If the there already is a user with that username: flash message
-    and re-present form.
+    If the there already is a user with that username: flash message and re-present form.
     """
+    if CURR_USER_KEY in session:
+        del session[CURR_USER_KEY]
 
     form = UserAddForm()
 
@@ -112,8 +113,9 @@ def login():
 @app.route('/logout')
 def logout():
     """Handle logout of user."""
-
-    # IMPLEMENT THIS
+    do_logout()
+    flash ('Bye bye!', 'success')
+    return redirect('/login')
 
 
 ##############################################################################
@@ -210,8 +212,31 @@ def stop_following(follow_id):
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
     """Update profile for current user."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    user = g.user
+    form = UserAddForm(obj=user)
 
-    # IMPLEMENT THIS
+    if form.validate_on_submit():
+        if User.authenticate(form.username.data,
+                                 form.password.data):
+            user.username = form.username.data
+            user.email = form.email.data
+            user.image_url = form.image_url.data or User.image_url.default.arg
+            user.header_image_url = form.header_image_url.data or User.header_image_url.arg
+            user.bio = form.bio.data
+
+            db.session.commit()
+            flash(f'Profile "{g.user.username}" updated.', 'success')
+            
+            return redirect (f'/users/{user.id}')
+        
+        flash('Wong password! Please try again', 'danger')
+
+    return render_template('users/edit.html', form=form, user=g.user)
+
 
 
 @app.route('/users/delete', methods=["POST"])
