@@ -31,7 +31,9 @@ connect_db(app)
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in, add curr user to Flask global."""
+    """If we're logged in, add curr user to Flask global.
+    g is an object provided by Flask for holding any data during a single app context.
+    A before_request handle set g.user, which will be accessible to the route and other functions."""
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
@@ -318,8 +320,10 @@ def homepage():
     """
 
     if g.user:
+        following_ids = [f.id for f in g.user.following] + [g.user.id]
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
