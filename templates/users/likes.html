@@ -18,9 +18,11 @@
             </div>
   
             {% if user.id == g.user.id %}
-              <form action="/messages/{{ msg.id }}/like">
-                <button class="btn btn-sm {{'btn-primary'}}">
-                  <i class="fa fa-thumbs-up"></i> 
+              <form action="/messages/{{ msg.id }}/like" method="POST">
+                <button class="btn btn-sm {{'btn-dark'}}">
+                  <a href="/messages/{{ msg.id }}/like">
+                    <i class="fa fa-thumbs-up"></i>
+                  </a> 
                 </button>
               </form>
             {% endif %}
