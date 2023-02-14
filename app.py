@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, UserEditForm, LoginForm, MessageForm
 from models import db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
@@ -219,7 +219,7 @@ def profile():
         return redirect("/")
     
     user = g.user
-    form = UserAddForm(obj=user)
+    form = UserEditForm(obj=user)
 
     if form.validate_on_submit():
         if User.authenticate(form.username.data,
@@ -241,7 +241,6 @@ def profile():
     return render_template('users/edit.html', form=form, user=g.user)
 
 
-
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
     """Delete user."""
@@ -256,6 +255,18 @@ def delete_user():
     db.session.commit()
 
     return redirect("/signup")
+
+
+@app.route('/users/<int:user_id>/likes', methods=['GET'])
+def add_like(user_id):
+    """Show user's liked warbles."""
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user, likes=user.likes)
+
 
 
 ##############################################################################
@@ -316,7 +327,7 @@ def homepage():
     """Show homepage:
 
     - anon users: no messages
-    - logged in: 100 most recent messages of followed_users
+    - logged in: 100 most recent messages of followed_users and the logged-in user
     """
 
     if g.user:
