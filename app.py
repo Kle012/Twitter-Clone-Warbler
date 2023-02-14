@@ -314,7 +314,7 @@ def toggle_like(message_id):
     
     liked_message = Message.query.get_or_404(message_id)
     if liked_message.user_id == g.user.id:
-        return abort(403)
+        return redirect('/')
     
     user_likes = g.user.likes
 
@@ -373,6 +373,13 @@ def homepage():
 
     else:
         return render_template('home-anon.html')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """404 NOT FOUND page."""
+
+    return render_template('404.html'), 404
 
 
 ##############################################################################
