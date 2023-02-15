@@ -31,7 +31,7 @@ db.create_all()
 
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+    """Test views for users."""
 
     def setUp(self):
         """Create test client, add sample data."""
@@ -105,7 +105,7 @@ class UserModelTestCase(TestCase):
 
     def test_is_following(self):
         """
-        Test if is_following detects correctly when a user following or not following another user.
+        Does is_following work?
         """
 
         self.u1.following.append(self.u2)
@@ -116,7 +116,8 @@ class UserModelTestCase(TestCase):
     
     def test_is_followed(self):
         """
-        Test if is_followed detects correctly when a user is followed or not followed another user."""
+        Does is_followed work?
+        """
 
         self.u1.followers.append(self.u2)
         db.session.commit()
@@ -129,7 +130,7 @@ class UserModelTestCase(TestCase):
 
     def test_valid_signup(self):
         """
-        Test if User.signup will successfully create a new user with valid inputs.
+        Does User.signup work with valid inputs?
         """
         u_test = User.signup('testvalid', 'valid@test.com', 'password', None)
         uid = 99999
@@ -148,7 +149,7 @@ class UserModelTestCase(TestCase):
     
     def test_not_valid_email(self):
         """
-        Test if User.signup will fail to create a new user with invalid email.
+        Does User.signup fail with invalid email?
         """
         not_valid = User.signup('not_valid', None, 'password', None)
         notid = 12345
@@ -158,7 +159,7 @@ class UserModelTestCase(TestCase):
     
     def test_not_valid_password(self):
         """
-        Test if User.signup will fail to create a new user with invalid password.
+        Does User.signup fail with invalid password?
         """
         with self.assertRaises(ValueError) as context:
             User.signup("invalid_pass", "invalid@invalid.com", "", None)
@@ -171,7 +172,7 @@ class UserModelTestCase(TestCase):
     
     def test_authenticate(self):
         """
-        Test if User.authenticate will successfully return a user with valid inputs.
+        Does User.authenticate work with valid inouts?
         """
         u = User.authenticate(self.u1.username, 'password')
         self.assertIsNotNone(u)
@@ -179,12 +180,12 @@ class UserModelTestCase(TestCase):
     
     def test_invalid_username(self):
         """
-        Test if User.authenticate will fail to return a user with invalid username.
+        Does User.authenticate fail with invalid username?
         """
         self.assertFalse(User.authenticate('invalid_username', 'password'))
     
     def test_invalid_password(self):
         """
-        Test if User.authenticate will fail to return a user with invalid password.
+        Does User.authenticate fail with invalid password?
         """
         self.assertFalse(User.authenticate(self.u1.username, 'invalidpassword'))
