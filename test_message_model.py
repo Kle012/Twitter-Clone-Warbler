@@ -48,8 +48,7 @@ class MessageModelTestCase(TestCase):
         self.assertEqual(self.u.messages[0].text, 'Hello')
     
     def test_message_likes(self):
-        """ Does toggle like work?
-        """
+        """ Does toggle like work?"""
         m1 = Message(
             text='Test_Like1',
             user_id = self.uid
@@ -74,4 +73,6 @@ class MessageModelTestCase(TestCase):
         like = Likes.query.filter(Likes.user_id == uid).all()
         self.assertEqual(len(like), 1)
         self.assertEqual(like[0].message_id, m1.id)
+    
+    
 
