@@ -1,3 +1,8 @@
+"""Message model tests."""
+# run these tests like:
+#
+# FLASK_ENV=production python -m unittest test_message_model.py
+
 import os
 from unittest import TestCase
 from sqlalchemy import exc
