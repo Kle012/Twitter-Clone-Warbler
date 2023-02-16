@@ -84,9 +84,7 @@ class UserViewTestCase(TestCase):
         m2 = Message(text='Warbles', user_id=self.u1_id)
         m3 = Message(id=24680, text='Twitter copycat', user_id=self.u2_id)
 
-        db.session.add(m1)
-        db.session.add(m2)
-        db.session.add(m3)
+        db.session.add_all([m1,m2,m3])
         db.session.commit()
 
         like = Likes(user_id=self.testuser_id, message_id=24680)
@@ -113,8 +111,53 @@ class UserViewTestCase(TestCase):
     
     def test_remove_like(self):
         """Test for remove like function."""
+        self.setup_likes()
+
         m = Message.query.filter(Message.text=='Twitter copycat').one()
         self.assertIsNotNone(m)
         self.assertNotEqual(m.user_id, self.u1_id)
 
+        # Make sure that testuser likes the message 'Twitter copycat'
+        l = Likes.query.filter(Likes.user_id==self.testuser_id and Likes.message_id==m.id).one()
+        self.assertIsNotNone(l)
 
+        with self.client as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser_id
+        
+        # Toggle like
+        res = client.post(f'/messages/{m.id}/like', follow_redirects=True)
+        self.assertEqual(res.status_code, 200)
+
+        likes = Likes.query.filter(Likes.message_id==m.id).all()
+        # Like has been removed
+        self.assertEqual(len(likes), 0)
+    
+    def test_unauthenticated_like(self):
+        """Test for like function when user logged-out"""
+        self.setup_likes()
+
+        m = Message.query.filter(Message.text=='Twitter copycat').one()
+        self.assertIsNotNone(m)
+
+        count = Likes.query.count()
+
+        with self.client as client:
+            res = client.post(f'/messages/{m.id}/like', follow_redirects=True)
+            self.assertEqual(res.status_code, 200)
+            self.assertIn('Access unauthorized', str(res.data))
+
+            # Due to invalid request, the count of likes stay the same
+            self.assertEqual(count, Likes.query.count())
+    
+    def setup_follows(self):
+        """Create test follows, add sample data."""
+        f1 = Follows(user_being_followed_id=self.u1_id, user_following_id=self.testuser_id)
+        f2 = Follows(user_being_followed_id=self.u2_id, user_following_id=self.testuser_id)
+        f3 = Follows(user_being_followed_id=self.testuser_id, user_following_id=self.u1_id)
+
+        db.session.add_all([f1,f2,f3])
+        db.session.commit()
+    
+    # def test_following(self):
+        """Test for following function."""
