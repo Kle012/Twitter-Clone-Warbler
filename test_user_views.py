@@ -168,6 +168,44 @@ class UserViewTestCase(TestCase):
             
             res = client.get(f'/users/{self.testuser_id}/following')
             self.assertEqual(res.status_code, 200)
-            self.assertIn('testuser', str(res.data))
+            self.assertIn('testuser1', str(res.data))
+            self.assertIn('testuser2', str(res.data))
+            self.assertNotIn('testuser3', str(res.data))
+            self.assertNotIn('testuser4', str(res.data))
+    
+    def test_followers(self):
+        """Test for followers function."""
+        self.setup_follows()
+        with self.client as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser_id
+            
+            res = client.get(f'/users/{self.testuser_id}/followers')
+            self.assertEqual(res.status_code, 200)
+            self.assertIn('testuser1', str(res.data))
+            self.assertNotIn('testuser2', str(res.data))
+            self.assertNotIn('testuser3', str(res.data))
+            self.assertNotIn('testuser4', str(res.data))
+    
+    def test_unauthorized_following(self):
+        """Test for unauthorized (or logged-out) access to following page"""
+        self.setup_follows()
+        with self.client as client:
+            res = client.get(f'/users/{self.testuser_id}/following', follow_redirects=True)
+            self.assertEqual(res.status_code, 200)
+            self.assertNotIn('testuser1', str(res.data))
+            self.assertIn('Access unauthorized', str(res.data))
+
+    def test_unauthorized_followers(self):
+        """Test for unauthorized (or logged-out) access to followers page"""
+        self.setup_follows()
+        with self.client as client:
+            res = client.get(f'/users/{self.testuser_id}/followers', follow_redirects=True)
+            self.assertEqual(res.status_code, 200)
+            self.assertNotIn('testuser1', str(res.data))
+            self.assertIn('Access unauthorized', str(res.data))
+    
+    
+
             
 
