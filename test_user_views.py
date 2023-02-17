@@ -204,8 +204,3 @@ class UserViewTestCase(TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertNotIn('testuser1', str(res.data))
             self.assertIn('Access unauthorized', str(res.data))
-    
-    
-
-            
-
