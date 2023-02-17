@@ -159,5 +159,15 @@ class UserViewTestCase(TestCase):
         db.session.add_all([f1,f2,f3])
         db.session.commit()
     
-    # def test_following(self):
+    def test_following(self):
         """Test for following function."""
+        self.setup_follows()
+        with self.client as client:
+            with client.session_transaction() as session:
+                session[CURR_USER_KEY] = self.testuser_id
+            
+            res = client.get(f'/users/{self.testuser_id}/following')
+            self.assertEqual(res.status_code, 200)
+            self.assertIn('testuser', str(res.data))
+            
+
